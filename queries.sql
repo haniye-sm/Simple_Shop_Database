@@ -1,0 +1,96 @@
+/****تعداد سفارشات و میزان فروش به تفکیک هرماه****/
+SELECT
+	  FORMAT(ORDER_DATE , '%Y-%M'),
+	  COUNT(ORDER_ID) AS TOTAL_ORDER,
+	  SUM(ORDER_AMOUNT) AS TOTAL_SALE
+FROM
+	  ORDERS
+GROUP BY 
+	  FORMAT(ORDER_DATE , '%Y-%M')
+ORDER BY
+	  SUM(ORDER_AMOUNT) DESC;
+
+
+
+
+/****مشتری‌هایی که در بازه زمانی 6ماه گذشته خرید نکرده‌اند****/
+SELECT
+	CUSTOMER_NAME , CUSTOMER_ID
+FROM
+	CUSTOMERS
+WHERE
+	CUSTOMER_ID NOT IN(
+		SELECT CUSTOMER_ID
+		FROM ORDERS
+		WHERE ORDER_DATE >= DATEADD(MONTH , -6 , GETDATE())
+);
+
+
+
+
+
+/****نمایش محصولاتی که حداقل 30 امتیاز ثبت شده دارند، میانگین امتیاز و تعداد امتیاز ثبت شده****/
+SELECT
+	P.PRODUCT_NAME,
+	AVG(R.RATING) AS 'AVERAGE RATE',
+	COUNT(R.RATING_ID) AS 'NUMBER OF RATINGS'
+FROM
+	PRODUCTS AS P
+JOIN 
+	RATINGS AS R ON P.PRODUCT_ID = R.PRODUCT_ID
+GROUP BY 
+	P.PRODUCT_NAME
+HAVING
+	COUNT(R.RATING_ID) > 30
+ORDER BY 
+	AVG(R.RATING) DESC;
+
+
+
+
+
+/****لیست نزولی مشتریانی که بیشترین تعداد سفارش را داشته‌اند همراه با مجموع مبلغ سفارشات****/
+SELECT 
+  C.CUSTOMER_ID,
+	C.CUSTOMER_NAME,
+	COUNT(O.ORDER_ID) AS 'TOTAL ORDERS',
+	SUM(O.ORDER_AMOUNT) AS 'TOTAL AMOUNT'
+FROM 
+	ORDERS AS O
+JOIN
+	CUSTOMERS AS C ON C.CUSTOMER_ID = O.CUSTOMER_ID
+GROUP BY
+	C.CUSTOMER_NAME
+ORDER BY
+	SUM(ORDER_AMOUNT) DESC;
+
+
+
+
+/****محصولاتی که در یکسال گذشته فروش نداشته‌اند****/
+SELECT
+	P.PRODUCT_ID,
+	P.PRODUCT_NAME
+FROM
+	PRODUCTS P
+LEFT JOIN
+	ORDERS O
+ON 
+	P.PRODUCT_ID = O.PRODUCT_ID
+AND 
+	O.ORDER_DATE >= DATEADD(YEAR , -1 , GETDATE())
+WHERE
+	O.ORDER_ID IS NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
